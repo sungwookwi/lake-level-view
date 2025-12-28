@@ -47,97 +47,10 @@
                     }
                 </style>
 
-    <!-- ================= Climate Panel Styles ================= -->
-<style>
-  .climate-panel {
-    position: absolute;
-    z-index: 9999;
-    bottom: 20px;
-    right: 20px;
-
-    width: 700px;
-    height: 520px;
-
-    min-width: 420px;
-    min-height: 320px;
-    max-width: 95vw;
-    max-height: 90vh;
-
-    background: rgba(255,255,255,0.97);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    border: 1px solid #ddd;
-
-    display: none;
-    overflow: hidden;
-
-    resize: both;        /* 🔑 enables resizing */
-  }
-
-  .climate-header {
-    padding: 8px 12px;
-    font-family: sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    background: #f5f5f5;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: default;
-  }
-
-  .climate-header button {
-    border: none;
-    background: none;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .climate-iframe {
-    width: 100%;
-    height: calc(100% - 38px); /* header height */
-    border: none;
-  }
-</style>
-<!-- ========================================================= -->
-
             
 </head>
 <body>
-
-    <!-- ================= Climate Panel ================= -->
-<div class="climate-panel" id="climatePanel">
-  <div class="climate-header">
-    <span>Climate Projections – Lake Ontario</span>
-    <button onclick="toggleClimate()">✕</button>
-  </div>
-  <iframe
-    class="climate-iframe"
-    src="climate/climate.html">
-  </iframe>
-</div>
-
-<div class="climate-toggle-btn" onclick="toggleClimate()">
-  Climate
-</div>
-<!-- ================================================= -->
-
-<div class="folium-map" id="map_ce6c3eb9f66b362fc934605f527e9839"></div>
-
-<!-- ================= Climate Toggle Script ================= -->
-<script>
-  function toggleClimate() {
-    var panel = document.getElementById("climatePanel");
-    if (!panel) return;
-    panel.style.display =
-      (panel.style.display === "none" || panel.style.display === "")
-        ? "block"
-        : "none";
-  }
-</script>
-<!-- ========================================================= -->
-    
+ 
     
         <style>
           .leaflet-control-layers .igld-caption{font-family:sans-serif;font-size:12px;font-weight:600;margin:6px 2px 4px 2px;color:#111;}
