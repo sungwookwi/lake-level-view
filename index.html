@@ -46,7 +46,59 @@
                         -ms-interpolation-mode: nearest-neighbor; /* ie */
                     }
                 </style>
+    
+          <style>
+            /* Climate analysis panel */
+            #climate-panel{
+              position:absolute;
+              bottom:15px;
+              left:15px;
+              z-index:9999;
+              background:rgba(255,255,255,0.95);
+              border-radius:10px;
+              box-shadow:0 2px 6px rgba(0,0,0,0.25);
+              font-family:sans-serif;
+              border:1px solid #ddd;
+              min-width:260px;
+            }
             
+            #climate-header{
+              padding:8px 12px;
+              font-weight:600;
+              font-size:13px;
+              cursor:pointer;
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+            }
+            
+            #climate-content{
+              padding:8px 12px 10px 12px;
+              display:none;
+            }
+            
+            #climate-content button{
+              width:100%;
+              margin-top:6px;
+              font-size:12px;
+            }
+            
+            #climate-help{
+              position:absolute;
+              bottom:15px;
+              left:290px;
+              z-index:9999;
+              background:rgba(255,255,255,0.95);
+              padding:10px 14px;
+              border-radius:10px;
+              box-shadow:0 2px 6px rgba(0,0,0,0.25);
+              font-family:sans-serif;
+              font-size:12px;
+              max-width:320px;
+              display:none;
+            }
+        </style>
+  
 </head>
 <body>
     
@@ -140,7 +192,40 @@
             <span class="mode-label">With connectivity</span>
           </div>
         </div>
-        
+
+    <div id="climate-panel">
+      <div id="climate-header">
+        Climate Change Analyses
+        <span id="climate-arrow">▶</span>
+      </div>
+    
+      <div id="climate-content">
+        <button onclick="window.open('climate/climate_projections.html','_blank')">
+          Projected Climate Trajectories (CMIP6 SSP2-4.5 & SSP5-8.5)
+        </button>
+    
+        <button onclick="window.open('climate/climate_deltas.html','_blank')">
+          GCM-Specific Climate Change Deltas
+        </button>
+    
+        <button onclick="window.open('climate/climate_response_surface.html','_blank')">
+          Lake Level Response Surfaces Under Climate Change
+        </button>
+    
+        <button style="margin-top:8px" onclick="toggleHelp()">
+          How to use this tool
+        </button>
+      </div>
+    </div>
+    
+    <div id="climate-help">
+      <b>How to use this tool</b><br><br>
+      • Select a water level from the layer control to visualize inundation extent.<br>
+      • Toggle connectivity to compare isolated vs hydraulically connected flooding.<br>
+      • Use the Climate Change Analyses to explore how projected climate conditions influence lake levels and flood risk.<br><br>
+      <button onclick="toggleHelp()">Close</button>
+    </div>
+
     
         <script>(function(){
           var mapVarName = "map_ce6c3eb9f66b362fc934605f527e9839";
@@ -924,4 +1009,22 @@
             );
         
 </script>
+
+    <script>
+        function toggleClimate(){
+          const c=document.getElementById('climate-content');
+          const a=document.getElementById('climate-arrow');
+          const open=c.style.display==='block';
+          c.style.display=open?'none':'block';
+          a.style.transform=open?'rotate(0deg)':'rotate(90deg)';
+        }
+        
+        function toggleHelp(){
+          const h=document.getElementById('climate-help');
+          h.style.display=(h.style.display==='block')?'none':'block';
+        }
+        
+        document.getElementById('climate-header').onclick=toggleClimate;
+    </script>
+
 </html>
