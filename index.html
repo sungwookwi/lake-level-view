@@ -1180,6 +1180,13 @@
                 [43.29972222222222, -79.79277777777777],
                 {}
             ).addTo(map_1b925cf0124a0091350d18247e7dfd3f);
+
+            // Hide water-level overlays from layer control (slider-only control)
+            var lc = document.querySelector('.leaflet-control-layers-overlays');
+            if (lc) {
+              lc.style.display = 'none';
+            }
+
         
     
             var div_icon_e247bb56f6ed0be5f80c207bc16874db = L.divIcon({"className": "empty", "html": "\u003cdiv class=\"pulse green\"\u003e\u003c/div\u003e"});
@@ -1284,6 +1291,23 @@
       // Safety: ensure exactly 30
       // (If not 30, slider will still work, but max will be adjusted.)
       var N = levels.length;
+
+      // --- Create tick marks for each selectable water level ---
+        var tickBox = document.getElementById('wl-ticks');
+        if (tickBox) {
+          tickBox.innerHTML = '';
+          for (var i = 0; i < N; i++) {
+            var tick = document.createElement('div');
+            tick.className = 'wl-tick';
+        
+            // Top = highest water level
+            var pos = 100 * (1 - i / (N - 1));
+            tick.style.top = pos + '%';
+        
+            tickBox.appendChild(tick);
+          }
+        }
+  
     
       var slider = document.getElementById('wl-range');
       var valueBox = document.getElementById('wl-value');
@@ -1337,26 +1361,10 @@
       });
     
       // Initialize slider at 74.20 m
-    var initLevel = 74.20;
-    var initIndex = levels.indexOf(Number(initLevel.toFixed(2)));
-    slider.value = (initIndex >= 0) ? initIndex : 0;
-    updateUI();
-
-
-        // --- Create tick marks for each water level ---
-        var tickBox = document.getElementById('wl-ticks');
-        tickBox.innerHTML = '';
-        
-        for (var i = 0; i < N; i++) {
-          var tick = document.createElement('div');
-          tick.className = 'wl-tick';
-        
-          var pos = 100 * (1 - i / (N - 1)); // top = high water
-          tick.style.top = pos + '%';
-        
-          tickBox.appendChild(tick);
-        }
-
+      var initLevel = 74.20;
+      var initIndex = levels.indexOf(Number(initLevel.toFixed(2)));
+      slider.value = (initIndex >= 0) ? initIndex : 0;
+      updateUI();
 
         
     })();
