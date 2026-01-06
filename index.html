@@ -110,7 +110,123 @@
             }
 
   
-        </style>            
+        </style>   
+
+    <style>
+      /* Water level slider panel (bottom-right) */
+      #wl-panel{
+        position:absolute;
+        right:15px;
+        bottom:15px;
+        z-index:9999;
+        width:64px;
+        height:340px;
+        background:rgba(255,255,255,0.95);
+        border:1px solid #ddd;
+        border-radius:12px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.25);
+        font-family:sans-serif;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:space-between;
+        padding:10px 8px;
+      }
+    
+      #wl-title{
+        font-size:11px;
+        font-weight:700;
+        color:#111;
+        text-align:center;
+        line-height:1.1;
+      }
+    
+      .wl-btn{
+        width:40px;
+        height:34px;
+        border-radius:8px;
+        background:#009fdf;
+        color:#fff;
+        font-size:22px;
+        font-weight:700;
+        line-height:34px;
+        text-align:center;
+        cursor:pointer;
+        user-select:none;
+        box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+      }
+      .wl-btn:hover{ background:#00adf2; }
+      .wl-btn:active{ transform:translateY(1px); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+    
+      #wl-slider-wrap{
+        position:relative;
+        flex:1;
+        width:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      }
+    
+      /* vertical range */
+      #wl-range{
+        -webkit-appearance: slider-vertical;
+        writing-mode: bt-lr;        /* firefox fallback */
+        width:10px;
+        height:100%;
+        padding:0;
+        margin:0;
+        background:
+          linear-gradient(to top, #cfcfcf 1px, transparent 1px) repeat-y;
+        background-size: 100% calc(100%/29); /* 30 steps => 29 intervals */
+        border-radius:10px;
+      }
+    
+      #wl-range:focus{ outline:none; }
+    
+      #wl-range::-webkit-slider-thumb{
+        -webkit-appearance:none;
+        width:16px;
+        height:16px;
+        border-radius:50%;
+        background:#009fdf;
+        border:2px solid #fff;
+        box-shadow:0 1px 3px rgba(0,0,0,0.25);
+        cursor:pointer;
+      }
+      #wl-range::-moz-range-thumb{
+        width:16px;height:16px;border-radius:50%;
+        background:#009fdf;border:2px solid #fff;
+        box-shadow:0 1px 3px rgba(0,0,0,0.25);
+        cursor:pointer;
+      }
+    
+      /* value label tooltip */
+      #wl-value{
+        position:absolute;
+        right:54px;
+        top:50%;
+        transform:translateY(-50%);
+        background:#009fdf;
+        color:#fff;
+        font-size:12px;
+        font-weight:700;
+        padding:6px 10px;
+        border-radius:8px;
+        white-space:nowrap;
+        box-shadow:0 2px 6px rgba(0,0,0,0.2);
+      }
+      #wl-value:after{
+        content:"";
+        position:absolute;
+        right:-6px;
+        top:50%;
+        transform:translateY(-50%);
+        border-left:6px solid #009fdf;
+        border-top:6px solid transparent;
+        border-bottom:6px solid transparent;
+      }
+    </style>
+
             
 </head>
 <body>
@@ -244,6 +360,20 @@
           • Use the Climate Change Analyses to explore how projected climate conditions influence lake levels and flood risk.<br><br>
           <button onclick="toggleHelp()">Close</button>
         </div>
+
+    <div id="wl-panel">
+      <div id="wl-title">Water<br>Level</div>
+    
+      <div class="wl-btn" id="wl-plus" title="Increase">+</div>
+    
+      <div id="wl-slider-wrap">
+        <input id="wl-range" type="range" min="0" max="29" step="1" value="0">
+        <div id="wl-value">--.-- m</div>
+      </div>
+    
+      <div class="wl-btn" id="wl-minus" title="Decrease">−</div>
+    </div>
+
         
     
         <script>(function(){
@@ -1110,5 +1240,84 @@
         document.getElementById('helpIcon').onclick = toggleHelp;
 
     </script>
+
+    <script>
+    (function(){
+      // --- 1) Collect the 30 water-level overlay entries from your existing layer control ---
+      // This object exists in your file:
+      // layer_control_a18c5cf8ec7a6958caaccffe51d4cce9.overlays  :contentReference[oaicite:1]{index=1}
+    
+      var overlaysObj = layer_control_a18c5cf8ec7a6958caaccffe51d4cce9.overlays;
+    
+      // Extract numeric keys (water levels). Ignore "DEM (Topo+Bathy)" etc.
+      var levels = Object.keys(overlaysObj)
+        .map(function(k){
+          var v = parseFloat(k);
+          return isNaN(v) ? null : Number(v.toFixed(2));
+        })
+        .filter(function(v){ return v !== null; })
+        .sort(function(a,b){ return a-b; });
+    
+      // Safety: ensure exactly 30
+      // (If not 30, slider will still work, but max will be adjusted.)
+      var N = levels.length;
+    
+      var slider = document.getElementById('wl-range');
+      var valueBox = document.getElementById('wl-value');
+      var btnPlus = document.getElementById('wl-plus');
+      var btnMinus = document.getElementById('wl-minus');
+    
+      slider.min = 0;
+      slider.max = Math.max(0, N - 1);
+      slider.step = 1;
+    
+      // --- 2) Helper to show exactly one selected water-level overlay ---
+      function setOnlyLevel(levelStr){
+        // Remove all level overlays first
+        for (var i=0; i<N; i++){
+          var k = levels[i].toFixed(2);
+          var layer = overlaysObj[k];
+          if (layer && map_1b925cf0124a0091350d18247e7dfd3f.hasLayer(layer)){
+            map_1b925cf0124a0091350d18247e7dfd3f.removeLayer(layer);
+          }
+        }
+    
+        // Add selected
+        var lyr = overlaysObj[levelStr];
+        if (lyr){
+          map_1b925cf0124a0091350d18247e7dfd3f.addLayer(lyr);
+        }
+      }
+    
+      function updateUI(){
+        var idx = Number(slider.value);
+        idx = Math.min(Math.max(idx, 0), N-1);
+    
+        var lvl = levels[idx].toFixed(2);
+        valueBox.textContent = lvl + ' m';
+    
+        // Move tooltip to follow thumb approximately (optional but looks nice)
+        var t = 1 - (idx / Math.max(1, (N-1))); // 0..1 inverted for vertical
+        valueBox.style.top = (t * 100) + '%';
+    
+        setOnlyLevel(lvl);
+      }
+    
+      slider.addEventListener('input', updateUI);
+      btnPlus.addEventListener('click', function(){
+        slider.stepUp();
+        updateUI();
+      });
+      btnMinus.addEventListener('click', function(){
+        slider.stepDown();
+        updateUI();
+      });
+    
+      // Initialize at current first level
+      slider.value = 0;
+      updateUI();
+    })();
+    </script>
+
 
 </html>
